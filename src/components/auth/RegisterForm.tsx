@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLanguage } from '@/context/LanguageContext'
 
 function sanitize(s: string) {
   return s.split('').filter(c => c.charCodeAt(0) <= 255).join('').trim()
@@ -13,7 +13,7 @@ export function RegisterForm() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPass, setShowPass] = useState(false)
-  const router = useRouter()
+  const { t, lang, setLang, isRTL } = useLanguage()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -25,7 +25,7 @@ export function RegisterForm() {
     const password = sanitize((form.elements.namedItem('password') as HTMLInputElement).value)
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
+      setError(isRTL ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.' : 'Password must be at least 8 characters.')
       setPending(false)
       return
     }
@@ -42,45 +42,47 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 animate-fade-in-up">
-      <div>
-        <h2 className="text-2xl font-bold text-white">Create account</h2>
-        <p className="text-sm mt-1" style={{ color: '#B3B3B3' }}>Start your AI fitness journey</p>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5 animate-fade-in-up" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">{t('createYourAccount')}</h2>
+          <p className="text-sm mt-1" style={{ color: '#B3B3B3' }}>
+            {isRTL ? 'ابدأ رحلتك اللياقية مع الذكاء الاصطناعي' : 'Start your AI fitness journey'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+          className="text-xs font-bold px-3 py-1.5 rounded-lg mt-1"
+          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#22C55E' }}
+        >
+          {lang === 'en' ? 'عربي' : 'EN'}
+        </button>
       </div>
 
       <div className="flex flex-col gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2 text-white">Email</label>
+          <label className="block text-sm font-medium mb-2 text-white">{t('email')}</label>
           <input
             id="email" name="email" type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             required autoComplete="email"
             className="w-full px-4 py-3.5 rounded-xl text-sm text-white placeholder:text-gray-600 outline-none transition-all focus:ring-2"
-            style={{
-              background: '#1A1A1A',
-              border: '1px solid #2A2A2A',
-              '--tw-ring-color': '#22C55E',
-            } as React.CSSProperties}
+            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', '--tw-ring-color': '#22C55E' } as React.CSSProperties}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 text-white">Password</label>
+          <label className="block text-sm font-medium mb-2 text-white">{t('password')}</label>
           <div className="relative">
             <input
               id="password" name="password" type={showPass ? 'text' : 'password'}
-              placeholder="At least 8 characters"
-              required
-              autoComplete="new-password"
+              placeholder={t('passwordPlaceholder')}
+              required autoComplete="new-password"
               className="w-full px-4 py-3.5 pr-12 rounded-xl text-sm text-white placeholder:text-gray-600 outline-none transition-all focus:ring-2"
-              style={{
-                background: '#1A1A1A',
-                border: '1px solid #2A2A2A',
-                '--tw-ring-color': '#22C55E',
-              } as React.CSSProperties}
+              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', '--tw-ring-color': '#22C55E' } as React.CSSProperties}
             />
             <button type="button" onClick={() => setShowPass(p => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-              style={{ color: '#666' }}>
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1" style={{ color: '#666' }}>
               {showPass
                 ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                 : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -96,23 +98,20 @@ export function RegisterForm() {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
+      <button type="submit" disabled={pending}
         className="w-full py-4 rounded-2xl font-bold text-base text-black transition-all active:scale-95 disabled:opacity-60"
-        style={{ background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' }}
-      >
-        {pending ? 'Creating account…' : 'Create Account'}
+        style={{ background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' }}>
+        {pending ? t('loading') : t('createAccount')}
       </button>
 
       <p className="text-sm text-center" style={{ color: '#666' }}>
-        By continuing you agree to our Terms &amp; Privacy Policy
+        {isRTL ? 'بالمتابعة فأنت توافق على شروطنا وسياسة الخصوصية' : 'By continuing you agree to our Terms & Privacy Policy'}
       </p>
 
       <p className="text-center text-sm" style={{ color: '#B3B3B3' }}>
-        Already have an account?{' '}
+        {t('alreadyHaveAccount')}{' '}
         <Link href="/login" className="font-semibold" style={{ color: '#22C55E' }}>
-          Sign in
+          {t('signInLink')}
         </Link>
       </p>
     </form>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getActiveProgram, getOnboardingData } from '@/actions/onboarding'
 import { getRecentWorkouts } from '@/actions/workout-log'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Exercise { name: string; sets: number; reps: string }
 interface DaySchedule { day_name: string; focus: string; exercises: Exercise[] }
@@ -15,15 +16,9 @@ interface Program {
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export default function DashboardPage() {
   const router = useRouter()
+  const { t, isRTL } = useLanguage()
   const [profile, setProfile] = useState<{ first_name?: string } | null>(null)
   const [program, setProgram] = useState<Program | null>(null)
   const [recentWorkouts, setRecentWorkouts] = useState<Array<{
@@ -52,6 +47,18 @@ export default function DashboardPage() {
     return new Date(w.created_at) >= startOfWeek
   }).length
 
+  function getGreeting() {
+    const h = new Date().getHours()
+    if (isRTL) {
+      if (h < 12) return 'صباح الخير'
+      if (h < 17) return 'مساء الخير'
+      return 'مساء الخير'
+    }
+    if (h < 12) return 'Good morning'
+    if (h < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -61,7 +68,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative px-5 pt-14 pb-4">
+    <div className="relative px-5 pt-14 pb-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div
         className="fixed inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(34,197,94,0.07) 0%, transparent 60%)' }}
@@ -72,7 +79,7 @@ export default function DashboardPage() {
         <div>
           <p className="text-sm" style={{ color: '#B3B3B3' }}>{getGreeting()}</p>
           <h1 className="text-2xl font-bold text-white mt-0.5">
-            {profile?.first_name || 'Athlete'} 👋
+            {profile?.first_name || (isRTL ? 'رياضي' : 'Athlete')} 👋
           </h1>
         </div>
         <div
@@ -89,16 +96,20 @@ export default function DashboardPage() {
           className="p-5 rounded-2xl mb-5"
           style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}
         >
-          <p className="font-bold text-white mb-1">Get Your AI Program</p>
+          <p className="font-bold text-white mb-1">
+            {isRTL ? 'احصل على برنامجك الذكي' : 'Get Your AI Program'}
+          </p>
           <p className="text-sm mb-4" style={{ color: '#B3B3B3' }}>
-            Answer 6 quick questions and the AI builds your perfect training plan.
+            {isRTL
+              ? 'أجب على 6 أسئلة سريعة ويبني الذكاء الاصطناعي خطتك التدريبية المثالية.'
+              : 'Answer 6 quick questions and the AI builds your perfect training plan.'}
           </p>
           <button
             onClick={() => router.push('/onboarding/personal')}
             className="px-5 py-2.5 rounded-xl font-bold text-sm text-black"
             style={{ background: '#22C55E' }}
           >
-            Build My Program →
+            {isRTL ? 'ابنِ برنامجي ←' : 'Build My Program →'}
           </button>
         </div>
       )}
@@ -107,9 +118,9 @@ export default function DashboardPage() {
       {program && (
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { label: 'Sessions', value: String(workoutsThisWeek) },
-            { label: 'Level', value: program.fitness_level ?? '—' },
-            { label: 'Days', value: String(program.weekly_schedule?.length ?? 0) + '/wk' },
+            { label: isRTL ? 'الجلسات' : 'Sessions', value: String(workoutsThisWeek) },
+            { label: isRTL ? 'المستوى' : 'Level', value: program.fitness_level ?? '—' },
+            { label: isRTL ? 'الأيام' : 'Days', value: String(program.weekly_schedule?.length ?? 0) + (isRTL ? '/أسبوع' : '/wk') },
           ].map(s => (
             <div
               key={s.label}
@@ -126,7 +137,9 @@ export default function DashboardPage() {
       {/* Today's workout */}
       {program && (
         <div className="mb-5">
-          <h2 className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: '#666' }}>Today</h2>
+          <h2 className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: '#666' }}>
+            {isRTL ? 'اليوم' : 'Today'}
+          </h2>
           {todayWorkout ? (
             <div
               className="p-5 rounded-2xl"
@@ -137,10 +150,12 @@ export default function DashboardPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-xs font-semibold mb-1" style={{ color: '#22C55E' }}>TODAY&apos;S WORKOUT</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: '#22C55E' }}>
+                    {isRTL ? 'تمرين اليوم' : "TODAY'S WORKOUT"}
+                  </p>
                   <h3 className="text-xl font-bold text-white">{todayWorkout.focus}</h3>
                   <p className="text-sm mt-1" style={{ color: '#B3B3B3' }}>
-                    {todayWorkout.exercises?.length ?? 0} exercises
+                    {todayWorkout.exercises?.length ?? 0} {isRTL ? 'تمارين' : 'exercises'}
                   </p>
                 </div>
                 <span className="text-3xl">💪</span>
@@ -150,7 +165,7 @@ export default function DashboardPage() {
                 className="w-full py-3.5 rounded-xl font-bold text-sm text-black transition-all active:scale-95"
                 style={{ background: '#22C55E' }}
               >
-                Start Workout
+                {isRTL ? 'ابدأ التمرين' : 'Start Workout'}
               </button>
             </div>
           ) : (
@@ -160,8 +175,10 @@ export default function DashboardPage() {
             >
               <span className="text-2xl">😴</span>
               <div>
-                <p className="font-bold text-white">Rest Day</p>
-                <p className="text-sm" style={{ color: '#B3B3B3' }}>Recovery is part of training</p>
+                <p className="font-bold text-white">{isRTL ? 'يوم راحة' : 'Rest Day'}</p>
+                <p className="text-sm" style={{ color: '#B3B3B3' }}>
+                  {isRTL ? 'التعافي جزء من التدريب' : 'Recovery is part of training'}
+                </p>
               </div>
             </div>
           )}
@@ -172,7 +189,9 @@ export default function DashboardPage() {
       {program?.weekly_schedule && (
         <div className="mb-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666' }}>This Week</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
+              {isRTL ? 'هذا الأسبوع' : 'This Week'}
+            </h2>
           </div>
           <div className="flex flex-col gap-2">
             {program.weekly_schedule.map((day, i) => {
@@ -198,12 +217,12 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-white truncate">{day.focus}</p>
                     <p className="text-xs" style={{ color: '#666' }}>
-                      {day.exercises?.length ?? 0} exercises
+                      {day.exercises?.length ?? 0} {isRTL ? 'تمارين' : 'exercises'}
                     </p>
                   </div>
                   {isToday && (
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: '#22C55E', color: 'black' }}>
-                      Today
+                      {isRTL ? 'اليوم' : 'Today'}
                     </span>
                   )}
                 </div>
@@ -217,13 +236,15 @@ export default function DashboardPage() {
       {recentWorkouts.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Recent</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
+              {isRTL ? 'الأخيرة' : 'Recent'}
+            </h2>
             <button
               onClick={() => router.push('/app/history')}
               className="text-xs font-medium"
               style={{ color: '#22C55E' }}
             >
-              See all
+              {isRTL ? 'عرض الكل' : 'See all'}
             </button>
           </div>
           <div className="flex flex-col gap-2">
@@ -239,7 +260,7 @@ export default function DashboardPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm text-white truncate">{w.workout_name}</p>
                   <p className="text-xs" style={{ color: '#666' }}>
-                    {w.duration_minutes}min · {(w.total_volume_kg ?? 0).toFixed(0)}kg volume
+                    {w.duration_minutes}{isRTL ? 'د' : 'min'} · {(w.total_volume_kg ?? 0).toFixed(0)}{isRTL ? 'كغ' : 'kg'}
                   </p>
                 </div>
               </div>

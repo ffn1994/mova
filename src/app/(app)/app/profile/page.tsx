@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/client'
 import { getOnboardingData, getActiveProgram } from '@/actions/onboarding'
 import { deleteAccount } from '@/actions/auth'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Profile {
   first_name?: string
@@ -27,7 +28,7 @@ function formatGoal(g?: string) {
   return g.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
-const GOALS = [
+const GOALS_EN = [
   { value: 'lose_fat', label: 'Lose Fat' },
   { value: 'build_muscle', label: 'Build Muscle' },
   { value: 'body_recomposition', label: 'Body Recomp' },
@@ -36,8 +37,18 @@ const GOALS = [
   { value: 'general_health', label: 'General Health' },
 ]
 
+const GOALS_AR = [
+  { value: 'lose_fat', label: 'فقدان الدهون' },
+  { value: 'build_muscle', label: 'بناء العضلات' },
+  { value: 'body_recomposition', label: 'إعادة تشكيل الجسم' },
+  { value: 'increase_strength', label: 'زيادة القوة' },
+  { value: 'improve_fitness', label: 'تحسين اللياقة' },
+  { value: 'general_health', label: 'الصحة العامة' },
+]
+
 export default function ProfilePage() {
   const router = useRouter()
+  const { t, isRTL } = useLanguage()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [program, setProgram] = useState<Program | null>(null)
   const [email, setEmail] = useState('')
@@ -49,11 +60,10 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
+  const GOALS = isRTL ? GOALS_AR : GOALS_EN
+
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabase = createClient()
     Promise.all([supabase.auth.getUser(), getOnboardingData(), getActiveProgram()]).then(
       ([{ data: { user } }, prof, prog]) => {
         setEmail(user?.email ?? '')
@@ -76,10 +86,7 @@ export default function ProfilePage() {
 
   async function saveEdit() {
     setSaving(true)
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase.from('user_onboarding').update({
@@ -95,10 +102,7 @@ export default function ProfilePage() {
   }
 
   async function handleSignOut() {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/welcome')
   }
@@ -124,41 +128,46 @@ export default function ProfilePage() {
   const inputStyle: React.CSSProperties = { background: '#1A1A1A', border: '1px solid #2A2A2A', color: 'white' }
 
   return (
-    <div className="px-5 pt-14 pb-4">
+    <div className="px-5 pt-14 pb-4" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Edit modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
           <div className="w-full max-w-[430px] rounded-t-3xl p-6 pb-10 flex flex-col gap-4" style={{ background: '#111' }}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-bold text-white">Edit Profile</h3>
+              <h3 className="text-lg font-bold text-white">{isRTL ? 'تعديل الملف' : 'Edit Profile'}</h3>
               <button onClick={() => setEditing(false)} style={{ color: '#666' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>Name</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>{isRTL ? 'الاسم' : 'Name'}</label>
               <input value={editForm.first_name} onChange={e => setEditForm(p => ({ ...p, first_name: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} placeholder="Your name" />
+                className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle}
+                placeholder={isRTL ? 'اسمك' : 'Your name'} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>Weight ({profile?.unit_preference ?? 'kg'})</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>
+                  {isRTL ? 'الوزن' : 'Weight'} ({profile?.unit_preference ?? 'kg'})
+                </label>
                 <input type="number" value={editForm.weight_kg} onChange={e => setEditForm(p => ({ ...p, weight_kg: e.target.value }))}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} placeholder="75" />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>Height (cm)</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>
+                  {isRTL ? 'الطول (سم)' : 'Height (cm)'}
+                </label>
                 <input type="number" value={editForm.height_cm} onChange={e => setEditForm(p => ({ ...p, height_cm: e.target.value }))}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} placeholder="175" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>Goal</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#B3B3B3' }}>{isRTL ? 'الهدف' : 'Goal'}</label>
               <div className="grid grid-cols-2 gap-2">
                 {GOALS.map(g => (
                   <button key={g.value} onClick={() => setEditForm(p => ({ ...p, fitness_goal: g.value }))}
-                    className="py-2.5 px-3 rounded-xl text-sm font-medium text-left transition-all"
+                    className="py-2.5 px-3 rounded-xl text-sm font-medium transition-all"
                     style={editForm.fitness_goal === g.value
                       ? { background: '#22C55E', color: 'black' }
                       : { background: '#1A1A1A', color: '#B3B3B3', border: '1px solid #2A2A2A' }
@@ -172,7 +181,7 @@ export default function ProfilePage() {
             <button onClick={saveEdit} disabled={saving}
               className="w-full py-4 rounded-2xl font-bold text-base text-black mt-2 transition-all active:scale-95 disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' }}>
-              {saving ? 'Saving…' : 'Save Changes'}
+              {saving ? t('loading') : (isRTL ? 'حفظ التغييرات' : 'Save Changes')}
             </button>
           </div>
         </div>
@@ -186,26 +195,30 @@ export default function ProfilePage() {
         >
           {profile?.first_name?.[0]?.toUpperCase() ?? '?'}
         </div>
-        <h1 className="text-xl font-bold text-white">{profile?.first_name || 'Athlete'}</h1>
+        <h1 className="text-xl font-bold text-white">{profile?.first_name || (isRTL ? 'رياضي' : 'Athlete')}</h1>
         <p className="text-sm mt-0.5" style={{ color: '#B3B3B3' }}>{email}</p>
       </div>
 
       {/* Program info */}
       {program && (
         <div className="p-4 rounded-2xl mb-5" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
-          <p className="text-xs font-semibold mb-2" style={{ color: '#22C55E' }}>CURRENT PROGRAM</p>
+          <p className="text-xs font-semibold mb-2" style={{ color: '#22C55E' }}>
+            {isRTL ? 'البرنامج الحالي' : 'CURRENT PROGRAM'}
+          </p>
           <p className="font-bold text-white">{program.training_system ?? '—'}</p>
-          <p className="text-sm mt-0.5" style={{ color: '#B3B3B3' }}>{program.estimated_weeks_to_goal ?? '—'} week timeline</p>
+          <p className="text-sm mt-0.5" style={{ color: '#B3B3B3' }}>
+            {program.estimated_weeks_to_goal ?? '—'} {isRTL ? 'أسبوع' : 'week timeline'}
+          </p>
         </div>
       )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         {[
-          { label: 'Goal', value: formatGoal(profile?.fitness_goal) },
-          { label: 'Level', value: profile?.fitness_level ?? '—' },
-          { label: 'Weight', value: profile?.weight_kg ? `${profile.weight_kg} ${profile.unit_preference ?? 'kg'}` : '—' },
-          { label: 'Height', value: profile?.height_cm ? `${profile.height_cm} cm` : '—' },
+          { label: isRTL ? 'الهدف' : 'Goal', value: formatGoal(profile?.fitness_goal) },
+          { label: isRTL ? 'المستوى' : 'Level', value: profile?.fitness_level ?? '—' },
+          { label: isRTL ? 'الوزن' : 'Weight', value: profile?.weight_kg ? `${profile.weight_kg} ${profile.unit_preference ?? 'kg'}` : '—' },
+          { label: isRTL ? 'الطول' : 'Height', value: profile?.height_cm ? `${profile.height_cm} cm` : '—' },
         ].map(s => (
           <div key={s.label} className="p-3 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
             <p className="text-xs mb-0.5 capitalize" style={{ color: '#666' }}>{s.label}</p>
@@ -217,10 +230,10 @@ export default function ProfilePage() {
       {/* Menu items */}
       <div className="flex flex-col gap-2 mb-6">
         {[
-          { label: 'Edit Profile', icon: '✏️', action: openEdit },
-          { label: 'My Workout Program', icon: '📋', action: () => router.push('/app/workout') },
-          { label: 'Workout History', icon: '📊', action: () => router.push('/app/history') },
-          { label: 'Rebuild Program', icon: '🔄', action: () => router.push('/onboarding/personal?rebuild=true') },
+          { label: isRTL ? 'تعديل الملف' : 'Edit Profile', icon: '✏️', action: openEdit },
+          { label: isRTL ? 'برنامج التمرين' : 'My Workout Program', icon: '📋', action: () => router.push('/app/workout') },
+          { label: isRTL ? 'سجل التمارين' : 'Workout History', icon: '📊', action: () => router.push('/app/history') },
+          { label: isRTL ? 'إعادة بناء البرنامج' : 'Rebuild Program', icon: '🔄', action: () => router.push('/onboarding/personal?rebuild=true') },
         ].map(item => (
           <button
             key={item.label}
@@ -230,7 +243,7 @@ export default function ProfilePage() {
           >
             <span className="text-lg">{item.icon}</span>
             <span className="text-sm font-medium text-white">{item.label}</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-auto">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={isRTL ? 'mr-auto rotate-180' : 'ml-auto'}>
               <path d="M6 4L10 8L6 12" stroke="#666" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </button>
@@ -243,7 +256,7 @@ export default function ProfilePage() {
         className="w-full py-4 rounded-2xl font-semibold text-sm transition-all active:scale-95 mb-3"
         style={{ background: '#1A1A1A', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
       >
-        Sign Out
+        {t('signOut')}
       </button>
 
       {/* Delete account */}
@@ -252,7 +265,7 @@ export default function ProfilePage() {
         className="w-full py-4 rounded-2xl font-semibold text-sm transition-all active:scale-95"
         style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.25)' }}
       >
-        Delete Account
+        {isRTL ? 'حذف الحساب' : 'Delete Account'}
       </button>
 
       {/* Delete confirmation modal */}
@@ -265,9 +278,13 @@ export default function ProfilePage() {
               </svg>
             </div>
 
-            <h3 className="text-xl font-bold text-white text-center mb-2">Delete Account?</h3>
+            <h3 className="text-xl font-bold text-white text-center mb-2">
+              {isRTL ? 'حذف الحساب؟' : 'Delete Account?'}
+            </h3>
             <p className="text-sm text-center mb-6" style={{ color: '#B3B3B3' }}>
-              This will permanently delete your account, workout history, and all data. This cannot be undone.
+              {isRTL
+                ? 'سيؤدي هذا إلى حذف حسابك وسجل التمارين وجميع البيانات بشكل دائم. لا يمكن التراجع عن هذا.'
+                : 'This will permanently delete your account, workout history, and all data. This cannot be undone.'}
             </p>
 
             {deleteError && (
@@ -283,7 +300,7 @@ export default function ProfilePage() {
                 className="w-full py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-60"
                 style={{ background: '#EF4444', color: 'white' }}
               >
-                {deleting ? 'Deleting…' : 'Yes, Delete My Account'}
+                {deleting ? t('loading') : (isRTL ? 'نعم، احذف حسابي' : 'Yes, Delete My Account')}
               </button>
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
@@ -291,7 +308,7 @@ export default function ProfilePage() {
                 className="w-full py-4 rounded-2xl font-semibold text-sm transition-all active:scale-95"
                 style={{ background: '#1A1A1A', color: '#B3B3B3', border: '1px solid #2A2A2A' }}
               >
-                Cancel
+                {isRTL ? 'إلغاء' : 'Cancel'}
               </button>
             </div>
           </div>
