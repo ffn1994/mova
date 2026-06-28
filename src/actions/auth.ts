@@ -13,7 +13,7 @@ export async function signUp(email: string, password: string) {
   const p = cleanStr(password)
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: e,
     password: p,
     options: {
@@ -22,6 +22,12 @@ export async function signUp(email: string, password: string) {
   })
 
   if (error) return { error: error.message }
+
+  // Email auto-confirmed → session exists → redirect to onboarding
+  if (data.session) {
+    redirect('/onboarding/personal')
+  }
+
   return { error: null, message: 'Check your email to confirm your account.' }
 }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signUp } from '@/actions/auth'
 import { useLanguage } from '@/context/LanguageContext'
 
 function sanitize(s: string) {
@@ -30,15 +30,20 @@ export function RegisterForm() {
       return
     }
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
+    // Sanitize client-side first, then call server action with clean strings.
+    const result = await signUp(email, password)
 
-    if (error) {
-      setError(error.message)
+    if (result?.error) {
+      setError(result.error)
       setPending(false)
-    } else {
-      window.location.href = '/onboarding/personal'
+    } else if (result?.message) {
+      // Email confirmation required — show the message
+      setError(null)
+      setPending(false)
+      // Reuse error box as info box - replace with a check-email state if needed
+      setError(result.message)
     }
+    // On auto-confirm, signUp() calls redirect() server-side — no client action needed.
   }
 
   return (

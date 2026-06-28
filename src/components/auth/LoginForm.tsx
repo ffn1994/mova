@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signIn } from '@/actions/auth'
 import { useLanguage } from '@/context/LanguageContext'
 
 function sanitize(s: string) {
@@ -24,15 +24,16 @@ export function LoginForm() {
     const email = sanitize((form.elements.namedItem('email') as HTMLInputElement).value)
     const password = sanitize((form.elements.namedItem('password') as HTMLInputElement).value)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    // Sanitize client-side first (removes BOM / non-ISO-8859-1 chars),
+    // then call the server action with clean ASCII-only strings.
+    const result = await signIn(email, password)
 
-    if (error) {
-      setError(error.message)
+    if (result?.error) {
+      setError(result.error)
       setPending(false)
-    } else {
-      window.location.href = '/app/dashboard'
     }
+    // On success, signIn() does redirect('/app/dashboard') server-side —
+    // no client-side navigation needed.
   }
 
   return (
