@@ -36,14 +36,14 @@ export function RegisterForm() {
     if (result?.error) {
       setError(result.error)
       setPending(false)
-    } else if (result?.message) {
-      // Email confirmation required — show the message
-      setError(null)
+    } else if (result?.confirmed) {
+      // Auto-confirmed — cookies set via Set-Cookie headers, navigate to onboarding.
+      window.location.href = '/onboarding/personal'
+    } else {
+      // Email confirmation required
+      setError(t('checkEmail'))
       setPending(false)
-      // Reuse error box as info box - replace with a check-email state if needed
-      setError(result.message)
     }
-    // On auto-confirm, signUp() calls redirect() server-side — no client action needed.
   }
 
   return (

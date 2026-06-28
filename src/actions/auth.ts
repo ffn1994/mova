@@ -23,12 +23,9 @@ export async function signUp(email: string, password: string) {
 
   if (error) return { error: error.message }
 
-  // Email auto-confirmed → session exists → redirect to onboarding
-  if (data.session) {
-    redirect('/onboarding/personal')
-  }
-
-  return { error: null, message: 'Check your email to confirm your account.' }
+  // Return whether session was created (auto-confirm) or email confirmation needed.
+  // Cookies are set via Set-Cookie headers; client handles navigation.
+  return { error: null, confirmed: !!data.session }
 }
 
 export async function signIn(email: string, password: string) {
@@ -40,7 +37,9 @@ export async function signIn(email: string, password: string) {
 
   if (error) return { error: error.message }
 
-  redirect('/app/dashboard')
+  // Return success — cookies are set via Set-Cookie response headers.
+  // Client handles the navigation so the browser picks up the new cookies.
+  return { error: null }
 }
 
 export async function signOut() {

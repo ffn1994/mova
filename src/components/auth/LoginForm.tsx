@@ -31,9 +31,11 @@ export function LoginForm() {
     if (result?.error) {
       setError(result.error)
       setPending(false)
+    } else {
+      // Server action set auth cookies via Set-Cookie headers.
+      // Hard navigate so the browser sends those cookies to the middleware.
+      window.location.href = '/app/dashboard'
     }
-    // On success, signIn() does redirect('/app/dashboard') server-side —
-    // no client-side navigation needed.
   }
 
   return (
