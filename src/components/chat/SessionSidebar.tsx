@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ChatSession } from '@/types'
 import { Button } from '@/components/ui/Button'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Props {
   activeSessionId: string | null
@@ -13,6 +14,7 @@ interface Props {
 export function SessionSidebar({ activeSessionId, onSelectSession }: Props) {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [loading, setLoading] = useState(false)
+  const { t } = useLanguage()
   const supabase = createClient()
 
   async function loadSessions() {
@@ -47,10 +49,10 @@ export function SessionSidebar({ activeSessionId, onSelectSession }: Props) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-gray-50">
+    <aside className="flex w-60 shrink-0 flex-col" style={{ borderRight: '1px solid #2A2A2A', background: '#111' }}>
       <div className="p-3">
         <Button onClick={createSession} loading={loading} className="w-full" variant="secondary">
-          + New Chat
+          {t('newChat')}
         </Button>
       </div>
 
@@ -59,15 +61,16 @@ export function SessionSidebar({ activeSessionId, onSelectSession }: Props) {
           <button
             key={session.id}
             onClick={() => onSelectSession(session.id)}
-            className={`w-full px-3 py-2 text-left text-sm truncate hover:bg-gray-100 transition-colors ${
-              session.id === activeSessionId ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'
+            className={`w-full px-3 py-2 text-start text-sm truncate transition-colors ${
+              session.id === activeSessionId ? 'bg-green-500/10 text-green-500 font-medium' : 'hover:bg-white/5'
             }`}
+            style={{ color: session.id === activeSessionId ? '#22C55E' : '#B3B3B3' }}
           >
             {session.title}
           </button>
         ))}
         {sessions.length === 0 && (
-          <p className="px-3 py-4 text-xs text-gray-400">No chats yet. Start a new one.</p>
+          <p className="px-3 py-4 text-xs" style={{ color: '#666' }}>{t('noChatsYet')}</p>
         )}
       </div>
     </aside>

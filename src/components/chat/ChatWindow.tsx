@@ -6,6 +6,7 @@ import { ChatMessage } from '@/types'
 import { MessageBubble } from './MessageBubble'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Props {
   sessionId: string | null
@@ -17,6 +18,7 @@ export function ChatWindow({ sessionId }: Props) {
   const [streaming, setStreaming] = useState(false)
   const [loadingHistory, setLoadingHistory] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const { t } = useLanguage()
   const supabase = createClient()
 
   async function loadHistory(sid: string) {
@@ -99,7 +101,7 @@ export function ChatWindow({ sessionId }: Props) {
         const updated = [...prev]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again.',
+          content: t('somethingWentWrong'),
         }
         return updated
       })
@@ -110,8 +112,8 @@ export function ChatWindow({ sessionId }: Props) {
 
   if (!sessionId) {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
-        Select a chat or start a new one.
+      <div className="flex flex-1 items-center justify-center text-sm" style={{ color: '#666' }}>
+        {t('selectChatPrompt')}
       </div>
     )
   }
@@ -122,8 +124,8 @@ export function ChatWindow({ sessionId }: Props) {
         {loadingHistory ? (
           <div className="flex justify-center py-8"><Spinner /></div>
         ) : messages.length === 0 ? (
-          <p className="text-center text-sm text-gray-400 py-8">
-            Ask me anything about fitness, training, or nutrition!
+          <p className="text-center text-sm py-8" style={{ color: '#666' }}>
+            {t('askAnything')}
           </p>
         ) : (
           messages.map((msg, i) => <MessageBubble key={i} message={msg} />)
@@ -131,16 +133,17 @@ export function ChatWindow({ sessionId }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="border-t border-gray-200 p-3 flex gap-2">
+      <form onSubmit={sendMessage} className="p-3 flex gap-2" style={{ borderTop: '1px solid #2A2A2A' }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Ask your fitness coach..."
+          placeholder={t('askCoachPlaceholder')}
           disabled={streaming}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
+          className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-1 focus:ring-green-500"
+          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
         />
         <Button type="submit" loading={streaming} disabled={!input.trim()}>
-          Send
+          {t('send')}
         </Button>
       </form>
     </div>

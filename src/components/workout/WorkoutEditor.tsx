@@ -5,6 +5,7 @@ import { WorkoutFormInputs } from '@/types'
 import { saveWorkout } from '@/actions/workout'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Props {
   content: string
@@ -14,8 +15,9 @@ interface Props {
 }
 
 export function WorkoutEditor({ content, inputs, onRegenerate, generating }: Props) {
+  const { t } = useLanguage()
   const [editedContent, setEditedContent] = useState(content)
-  const [title, setTitle] = useState('My Workout Plan')
+  const [title, setTitle] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,8 +46,8 @@ export function WorkoutEditor({ content, inputs, onRegenerate, generating }: Pro
         id="plan-title"
         value={title}
         onChange={e => setTitle(e.target.value)}
-        label="Plan Title"
-        placeholder="My Workout Plan"
+        label={t('planTitleLabel')}
+        placeholder={t('planTitlePlaceholder')}
       />
 
       <textarea
@@ -54,7 +56,7 @@ export function WorkoutEditor({ content, inputs, onRegenerate, generating }: Pro
         readOnly={generating}
         rows={20}
         className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm font-mono leading-relaxed focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 resize-y disabled:bg-gray-50"
-        placeholder="Your workout plan will appear here..."
+        placeholder={t('workoutPlaceholder')}
       />
 
       {error && (
@@ -63,7 +65,7 @@ export function WorkoutEditor({ content, inputs, onRegenerate, generating }: Pro
 
       <div className="flex gap-2">
         <Button variant="secondary" onClick={onRegenerate} disabled={generating} className="flex-1">
-          Regenerate
+          {t('regenerate')}
         </Button>
         <Button
           onClick={handleSave}
@@ -71,7 +73,7 @@ export function WorkoutEditor({ content, inputs, onRegenerate, generating }: Pro
           disabled={generating || !editedContent.trim()}
           className="flex-1"
         >
-          {saved ? 'Saved!' : 'Save Plan'}
+          {saved ? t('savedLabel') : t('savePlan')}
         </Button>
       </div>
     </div>

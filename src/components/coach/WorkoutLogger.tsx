@@ -135,9 +135,9 @@ export function WorkoutLogger({ session }: Props) {
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       {/* Session header */}
-      <div className="bg-green-600 text-white rounded-xl px-5 py-4">
+      <div className="bg-green-500 text-black rounded-xl px-5 py-4">
         <h2 className="font-semibold">{session.type}</h2>
-        <p className="text-sm text-green-200 mt-0.5">~{session.estimated_duration_minutes} min · {session.intensity} intensity</p>
+        <p className="text-sm text-black/60 mt-0.5">~{session.estimated_duration_minutes} min · {session.intensity} intensity</p>
       </div>
 
       {/* Exercises */}
@@ -187,7 +187,7 @@ export function WorkoutLogger({ session }: Props) {
                 </div>
               ))}
               <button onClick={() => addSet(exIdx)}
-                className="text-xs text-green-600 hover:text-green-700 font-medium mt-1">
+                className="text-xs text-green-500 hover:text-green-400 font-medium mt-1">
                 + Add set
               </button>
             </div>
@@ -203,7 +203,7 @@ export function WorkoutLogger({ session }: Props) {
                     <div className="flex gap-1.5">
                       {[1,2,3,4,5].map(n => (
                         <button key={n} onClick={() => updateFeedback(exIdx, 'technique', n)}
-                          className={`w-8 h-8 rounded-full text-xs font-semibold border transition-colors ${ex.feedback.technique === n ? 'bg-green-600 text-white border-green-600' : 'border-gray-200 text-gray-500 hover:border-green-400'}`}>
+                          className={`w-8 h-8 rounded-full text-xs font-semibold border transition-colors ${ex.feedback.technique === n ? 'bg-green-500 text-black border-green-500' : 'border-gray-200 text-gray-500 hover:border-green-400'}`}>
                           {n}
                         </button>
                       ))}
@@ -231,7 +231,7 @@ export function WorkoutLogger({ session }: Props) {
                         { value: 'too_heavy', label: 'Too heavy' },
                       ] as const).map(({ value, label }) => (
                         <button key={value} onClick={() => updateFeedback(exIdx, 'weightFeel', value)}
-                          className={`flex-1 rounded-lg border py-1.5 text-xs transition-colors ${ex.feedback.weightFeel === value ? 'border-green-600 bg-green-50 text-green-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
+                          className={`flex-1 rounded-lg border py-1.5 text-xs transition-colors ${ex.feedback.weightFeel === value ? 'border-green-500 bg-green-500/10 text-green-500 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
                           {label}
                         </button>
                       ))}
@@ -251,11 +251,11 @@ export function WorkoutLogger({ session }: Props) {
         <div className="mb-4">
           <div className="flex justify-between mb-1">
             <label className="text-sm font-medium text-gray-700">Overall session RPE</label>
-            <span className="text-sm font-bold text-green-600">{sessionRPE}/10</span>
+            <span className="text-sm font-bold text-green-500">{sessionRPE}/10</span>
           </div>
           <input type="range" min={1} max={10} step={0.5} value={sessionRPE}
             onChange={e => setSessionRPE(Number(e.target.value))}
-            className="w-full accent-green-600"/>
+            className="w-full accent-green-500"/>
           <div className="flex justify-between text-xs text-gray-400 mt-0.5"><span>Very easy</span><span>Max effort</span></div>
         </div>
 

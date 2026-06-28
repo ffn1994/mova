@@ -5,7 +5,7 @@ import { CoachDecision as CoachDecisionType } from '@/types'
 import { Button } from '@/components/ui/Button'
 
 const RECOMMENDATION_CONFIG = {
-  train: { label: 'Train Today', color: 'bg-green-100 text-green-800 border-green-200', dot: 'bg-green-500' },
+  train: { label: 'Train Today', color: 'bg-green-500/10 text-green-500 border-green-500/20', dot: 'bg-green-500' },
   deload: { label: 'Deload Week', color: 'bg-blue-100 text-blue-800 border-blue-200', dot: 'bg-blue-500' },
   active_recovery: { label: 'Active Recovery', color: 'bg-amber-100 text-amber-800 border-amber-200', dot: 'bg-amber-500' },
   rest: { label: 'Rest Day', color: 'bg-gray-100 text-gray-700 border-gray-200', dot: 'bg-gray-400' },
@@ -14,7 +14,7 @@ const RECOMMENDATION_CONFIG = {
 const INTENSITY_COLORS = { low: 'text-blue-600', moderate: 'text-amber-600', high: 'text-red-600' }
 
 function ReadinessGauge({ score }: { score: number }) {
-  const color = score >= 70 ? '#16a34a' : score >= 40 ? '#d97706' : '#dc2626'
+  const color = score >= 70 ? '#22C55E' : score >= 40 ? '#d97706' : '#dc2626'
   const label = score >= 70 ? 'Good' : score >= 40 ? 'Moderate' : 'Low'
 
   return (
@@ -83,13 +83,13 @@ export function CoachDecision({ decision, sessionExists }: { decision: CoachDeci
               </Link>
             )}
             {sessionExists && (
-              <span className="text-sm text-green-600 font-medium">Completed</span>
+              <span className="text-sm text-green-500 font-medium">Completed</span>
             )}
           </div>
 
           {decision.session.pre_workout_note && (
-            <div className="rounded-lg bg-green-50 border border-green-100 px-4 py-3 mb-4">
-              <p className="text-sm text-green-800">{decision.session.pre_workout_note}</p>
+            <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 mb-4">
+              <p className="text-sm text-green-500">{decision.session.pre_workout_note}</p>
             </div>
           )}
 
@@ -143,8 +143,8 @@ export function CoachDecision({ decision, sessionExists }: { decision: CoachDeci
       )}
 
       {/* Coaching message */}
-      <div className="bg-green-600 rounded-xl p-5 text-white">
-        <p className="text-xs font-semibold text-green-200 uppercase tracking-wide mb-2">From Your Coach</p>
+      <div className="bg-green-500 rounded-xl p-5 text-black">
+        <p className="text-xs font-semibold text-black/60 uppercase tracking-wide mb-2">From Your Coach</p>
         <p className="text-sm leading-relaxed">{decision.coaching_message}</p>
       </div>
 

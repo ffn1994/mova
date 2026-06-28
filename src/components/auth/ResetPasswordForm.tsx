@@ -5,6 +5,10 @@ import { sendResetEmail } from '@/actions/auth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
+function sanitize(s: string) {
+  return s.split('').filter(c => c.charCodeAt(0) <= 255).join('').trim()
+}
+
 export function ResetPasswordForm() {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -14,9 +18,12 @@ export function ResetPasswordForm() {
     e.preventDefault()
     setError(null)
     setMessage(null)
-    const formData = new FormData(e.currentTarget)
+
+    const form = e.currentTarget
+    const email = sanitize((form.elements.namedItem('email') as HTMLInputElement).value)
+
     startTransition(async () => {
-      const result = await sendResetEmail(formData)
+      const result = await sendResetEmail(email)
       if (result.error) setError(result.error)
       else setMessage(result.message ?? 'Email sent.')
     })
@@ -40,7 +47,7 @@ export function ResetPasswordForm() {
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       )}
       {message && (
-        <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{message}</p>
+        <p className="rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-500">{message}</p>
       )}
 
       <Button type="submit" loading={pending} className="w-full">

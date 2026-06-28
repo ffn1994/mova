@@ -5,6 +5,10 @@ import { updatePassword } from '@/actions/auth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
+function sanitize(s: string) {
+  return s.split('').filter(c => c.charCodeAt(0) <= 255).join('').trim()
+}
+
 export function NewPasswordForm() {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -12,14 +16,17 @@ export function NewPasswordForm() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
-    const formData = new FormData(e.currentTarget)
-    const password = formData.get('password') as string
+
+    const form = e.currentTarget
+    const password = sanitize((form.elements.namedItem('password') as HTMLInputElement).value)
+
     if (password.length < 8) {
       setError('Password must be at least 8 characters.')
       return
     }
+
     startTransition(async () => {
-      const result = await updatePassword(formData)
+      const result = await updatePassword(password)
       if (result?.error) setError(result.error)
     })
   }

@@ -7,10 +7,12 @@ import { CoachDecision } from '@/components/coach/CoachDecision'
 import { Spinner } from '@/components/ui/Spinner'
 import { getUserProfile, getTodayReadiness, getTodayCoachDecision, saveReadiness } from '@/actions/coach'
 import { CoachDecision as CoachDecisionType, DailyReadiness, UserFitnessProfile } from '@/types'
+import { useLanguage } from '@/context/LanguageContext'
 
 type Stage = 'loading' | 'profile_setup' | 'readiness' | 'analyzing' | 'decision' | 'error'
 
 export default function CoachPage() {
+  const { t } = useLanguage()
   const [stage, setStage] = useState<Stage>('loading')
   const [decision, setDecision] = useState<CoachDecisionType | null>(null)
   const [sessionExists, setSessionExists] = useState(false)
@@ -95,17 +97,17 @@ export default function CoachPage() {
     <div className="p-8">
       {stage === 'profile_setup' && (
         <>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">AI Coach</h1>
-          <p className="text-gray-500 mb-8">Your personal training intelligence.</p>
+          <h1 className="text-2xl font-bold text-white mb-1">{t('aiCoachPageTitle')}</h1>
+          <p className="mb-8" style={{ color: '#B3B3B3' }}>{t('aiCoachPageDesc')}</p>
           <ProfileSetup onComplete={() => { setStage('readiness') }} />
         </>
       )}
 
       {stage === 'readiness' && (
         <>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Morning Check-In</h1>
-          <p className="text-gray-500 mb-8">
-            {profile ? `Hi! Let's see how you're feeling today before planning your session.` : 'Rate how you feel right now.'}
+          <h1 className="text-2xl font-bold text-white mb-1">{t('morningCheckin')}</h1>
+          <p className="mb-8" style={{ color: '#B3B3B3' }}>
+            {profile ? t('morningCheckinGreeting') : t('morningCheckinDesc')}
           </p>
           <ReadinessForm onSubmit={handleReadinessSubmit} loading={false} />
         </>
@@ -115,8 +117,8 @@ export default function CoachPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner className="w-8 h-8" />
           <div className="text-center">
-            <p className="font-semibold text-gray-900">Analyzing your data...</p>
-            <p className="text-sm text-gray-500 mt-1">Your AI coach is reviewing your readiness, recovery, and training history.</p>
+            <p className="font-semibold text-gray-900">{t('analyzingData')}</p>
+            <p className="text-sm text-gray-500 mt-1">{t('analyzingDesc')}</p>
           </div>
         </div>
       )}
@@ -125,16 +127,17 @@ export default function CoachPage() {
         <>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Today&apos;s Plan</h1>
-              <p className="text-gray-500 text-sm mt-0.5">
+              <h1 className="text-2xl font-bold text-white">{t('todaysPlan')}</h1>
+              <p className="text-sm mt-0.5" style={{ color: '#B3B3B3' }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
             <button
               onClick={() => setStage('readiness')}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-sm transition-colors"
+              style={{ color: '#666' }}
             >
-              Re-check in
+              {t('reCheckIn')}
             </button>
           </div>
           <CoachDecision decision={decision} sessionExists={sessionExists} />
@@ -142,11 +145,11 @@ export default function CoachPage() {
       )}
 
       {stage === 'error' && (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-6 max-w-md">
-          <h3 className="font-semibold text-red-900 mb-1">Error</h3>
-          <p className="text-sm text-red-700">{errorMessage}</p>
-          <button onClick={() => setStage('loading')} className="mt-3 text-sm text-red-600 hover:underline">
-            Try again
+        <div className="rounded-xl p-6 max-w-md" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+          <h3 className="font-semibold text-red-400 mb-1">{t('error')}</h3>
+          <p className="text-sm text-red-400">{errorMessage}</p>
+          <button onClick={() => setStage('loading')} className="mt-3 text-sm text-red-400 hover:underline">
+            {t('tryAgain')}
           </button>
         </div>
       )}

@@ -8,18 +8,26 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ variant = 'primary', loading, children, className = '', disabled, ...props }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+  const base = 'inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-95 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
 
   const variants = {
-    primary: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-400',
-    ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'text-black',
+    secondary: 'text-white',
+    ghost: 'text-white',
+    danger: 'bg-red-600 text-white hover:bg-red-700',
+  }
+
+  const inlineStyles: Record<string, React.CSSProperties> = {
+    primary: { background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' },
+    secondary: { background: '#1A1A1A', border: '1px solid #2A2A2A' },
+    ghost: { background: 'transparent' },
+    danger: {},
   }
 
   return (
     <button
       className={`${base} ${variants[variant]} ${className}`}
+      style={inlineStyles[variant]}
       disabled={disabled || loading}
       {...props}
     >

@@ -34,10 +34,10 @@ export default function WorkoutLogPage() {
   if (!session) return null
 
   return (
-    <div className="p-8">
+    <div className="p-6 pt-14">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Log Workout</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Track your sets and give feedback as you go.</p>
+        <h1 className="text-2xl font-bold text-white">Log Workout</h1>
+        <p className="text-sm mt-0.5" style={{ color: '#B3B3B3' }}>Track your sets and give feedback as you go.</p>
       </div>
       <WorkoutLogger session={session} />
     </div>
